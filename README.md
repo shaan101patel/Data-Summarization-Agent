@@ -138,6 +138,12 @@ All server actions and parsers should route through these helpers to guarantee c
 
 `src/server/actions/summarizeAll.ts` iterates through hosts with modest concurrency (default 3), yielding incremental results via an async iterator so UIs can stream batch summaries without blocking. Each item reuses `summarizeHost`, carries the originating host/index, and continues even when individual hosts fail.
 
+`src/server/prompts/hostPrompt.ts` houses versioned prompt builders (`HOST_PROMPT_VERSION`) that keep inputs under provider token budgets by truncating banners, CVE descriptions, and threat labels while still surfacing IP, geo/ASN context, protocol counts, TLS flags, and malware signals. Guardrails ensure prompts never exceed the configured `MAX_TOKENS`, and summarization errors classify rate-limit vs transient failures so the UI can communicate deterministic retry guidance.
+
+## Accessibility & UI
+
+The default landing page demonstrates the agent with semantic regions (`header`, `main`, `section`), a skip link for keyboard navigation, and visible focus states derived from the shared design system in `globals.css`. Severity indicators combine icons with text badges so status is legible without relying on color alone, matching the yellow/gold accent cues in the target styling.
+
 ## Available Scripts
 
 ```text

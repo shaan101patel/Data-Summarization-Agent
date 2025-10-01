@@ -1,13 +1,27 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-page: #ffffff;
+  --color-page-muted: #f7f9fc;
+  --color-text: #1f2933;
+  --color-text-subtle: #52606d;
+  --color-border: #d8dee6;
+  --color-accent: #1f6feb;
+  --color-accent-soft: #d0e2ff;
+  --color-action: #214e7a;
+  --color-focus: #f59e0b;
+  --color-badge-critical: #a30015;
+  --color-badge-high: #c2410c;
+  --color-badge-medium: #ca8a04;
+  --color-badge-low: #2563eb;
+  --color-badge-informational: #0f766e;
+  --font-body: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --focus-ring: 3px solid var(--color-focus);
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html,
@@ -16,27 +30,67 @@ body {
   overflow-x: hidden;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+body.theme-root {
+  background: var(--color-page);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
 a {
-  color: inherit;
-  text-decoration: none;
+  color: var(--color-action);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+a:hover,
+a:focus-visible {
+  text-decoration: underline;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: var(--color-action);
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transform: translateY(-200%);
+  transition: transform 0.2s ease;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+::selection {
+  background: var(--color-accent-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

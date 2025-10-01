@@ -1,88 +1,145 @@
 import styles from "./page.module.css";
 
-const checklistItems = [
-  "Load and validate the Censys host dataset on the server",
-  "Normalize risk indicators, services, and threat intel for quick triage",
-  "Trigger server-only LLM summaries with clear guardrails",
+const severityLegend = [
+  {
+    level: "Critical",
+    description: "Active exploitation detected or imminent compromise.",
+    tone: "critical",
+    icon: "⛔",
+  },
+  {
+    level: "High",
+    description: "Severe vulnerabilities or weaponized malware observed.",
+    tone: "high",
+    icon: "⚠️",
+  },
+  {
+    level: "Medium",
+    description: "Actionable risk requiring sustained monitoring.",
+    tone: "medium",
+    icon: "△",
+  },
+  {
+    level: "Low",
+    description: "Minor findings or hygiene improvements recommended.",
+    tone: "low",
+    icon: "ℹ️",
+  },
+];
+
+const nextSteps = [
+  {
+    title: "Normalize host telemetry",
+    detail:
+      "Derive deterministic risk badges, port summaries, and threat labels to power filters and prompts.",
+  },
+  {
+    title: "Streamline summarization",
+    detail:
+      "Use server actions with prompt guardrails, retries, and transparent error states for operators.",
+  },
+  {
+    title: "Design accessible oversight",
+    detail:
+      "Deliver clear hierarchy, keyboard-friendly controls, and severity badges backed by text + icons.",
+  },
 ];
 
 const resourceLinks = [
   {
-    href: "https://nextjs.org/docs/app",
-    label: "Next.js App Router docs",
+    href: "https://github.com/shaan101patel/Data-Summarization-Agent/blob/main/SampleData/hosts_dataset.json",
+    label: "View sample dataset",
   },
   {
-    href: "https://zod.dev",
-    label: "Zod validation library",
+    href: "https://github.com/shaan101patel/Data-Summarization-Agent/blob/main/README.md",
+    label: "Read the project guide",
   },
   {
-    href: "https://vitest.dev/guide",
-    label: "Vitest testing guide",
+    href: "https://censys.io/", // placeholder for brand alignment
+    label: "Visit Censys",
   },
 ];
 
 export default function Home() {
   return (
-    <main className={styles.main}>
-      <section className={styles.hero}>
-        <p className={styles.badge}>Project kickoff</p>
-        <h1>Data Summarization Agent</h1>
-        <p className={styles.tagline}>
-          A streamlined Next.js foundation for exploring Censys host data and delivering
-          concise, risk-aware summaries powered by server actions.
-        </p>
-        <div className={styles.actions}>
-          <a
-            className={styles.primaryAction}
-            href="https://github.com/shaan101patel/Data-Summarization-Agent/blob/main/SampleData/hosts_dataset.json"
-            target="_blank"
-            rel="noreferrer"
-          >
-            View sample dataset
-          </a>
-          <a
-            className={styles.secondaryAction}
-            href="https://github.com/shaan101patel/Data-Summarization-Agent/blob/main/README.md"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Read the project guide
-          </a>
+    <div className={styles.layout}>
+      <header className={styles.header}>
+        <div className={styles.headerContent}>
+          <div className={styles.brand}>
+            <span className={styles.brandMark} aria-hidden>
+              ◎
+            </span>
+            <span className={styles.brandText}>Censys Collections Preview</span>
+          </div>
+          <nav className={styles.nav} aria-label="Primary navigation">
+            <a href="#main">Dashboard</a>
+            <a href="#severity">Severity Guide</a>
+            <a href="#actions">Plan</a>
+          </nav>
         </div>
-      </section>
+      </header>
 
-      <section className={styles.cardGrid} aria-label="Upcoming milestones">
-        <article className={styles.card}>
-          <h2>What&apos;s next</h2>
-          <ul>
-            {checklistItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </article>
-        <article className={styles.card}>
-          <h2>Key resources</h2>
-          <ul>
-            {resourceLinks.map((link) => (
-              <li key={link.href}>
-                <a href={link.href} target="_blank" rel="noreferrer">
+      <main id="main" className={styles.main} role="main">
+        <section className={styles.hero} aria-labelledby="hero-heading">
+          <div>
+            <p className={styles.leadIn}>Track your queries with confidence</p>
+            <h1 id="hero-heading">Data Summarization Agent</h1>
+            <p className={styles.tagline}>
+              Load Censys host data, triage meaningful signals, and generate concise LLM-backed
+              insights without exposing keys to the client.
+            </p>
+            <div className={styles.actionRow}>
+              {resourceLinks.map((link) => (
+                <a key={link.href} className={styles.primaryAction} href={link.href}>
                   {link.label}
                 </a>
-              </li>
+              ))}
+            </div>
+          </div>
+          <aside className={styles.legend} aria-labelledby="severity">
+            <h2 id="severity">Severity legend</h2>
+            <ul>
+              {severityLegend.map((item) => (
+                <li key={item.level} className={styles[`legendItem-${item.tone}`]}>
+                  <span className={styles.legendIcon} aria-hidden>
+                    {item.icon}
+                  </span>
+                  <div>
+                    <p className={styles.legendLabel}>{item.level}</p>
+                    <p className={styles.legendDescription}>{item.description}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        </section>
+
+        <section
+          id="actions"
+          className={styles.trackSection}
+          aria-labelledby="actions-heading"
+        >
+          <h2 id="actions-heading">Launch checklist</h2>
+          <div className={styles.cardGrid}>
+            {nextSteps.map((step) => (
+              <article key={step.title} className={styles.card}>
+                <h3>{step.title}</h3>
+                <p>{step.detail}</p>
+              </article>
             ))}
+          </div>
+        </section>
+
+        <section className={styles.accessibility} aria-labelledby="accessibility-heading">
+          <h2 id="accessibility-heading">Accessibility at a glance</h2>
+          <ul>
+            <li>Semantic regions (<code>header</code>, <code>main</code>, <code>section</code>)
+              ensure assistive tech reads context accurately.</li>
+            <li>Keyboard users get skip links and persistent focus rings for navigation.</li>
+            <li>Severity metadata pairs icons with text so meaning never depends on color.</li>
           </ul>
-        </article>
-        <article className={styles.card}>
-          <h2>Quality guardrails</h2>
-          <p>
-            Husky runs linting, strict type checks, and tests before every commit.
-            Prettier keeps formatting consistent across the codebase.
-          </p>
-          <p className={styles.subtle}>
-            Use `npm run format:write` before submitting a PR.
-          </p>
-        </article>
-      </section>
-    </main>
+        </section>
+      </main>
+    </div>
   );
 }

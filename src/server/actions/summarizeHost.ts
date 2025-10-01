@@ -6,11 +6,14 @@ import { z } from "zod";
 
 import { getServerEnv, type ServerEnv } from "../env";
 import type { NormalizedHost } from "../normalize";
+import { buildHostPrompt } from "../prompts/hostPrompt";
 
 export type SummarizationErrorKind =
   | "none"
   | "missing-config"
   | "timeout"
+  | "rate-limit"
+  | "transient"
   | "provider"
   | "invalid-response"
   | "unknown";
@@ -26,6 +29,9 @@ export interface SummarizeHostResult {
     durationMs: number;
     usedFallback: boolean;
     provider: string;
+    promptVersion: string;
+    promptCharacters: number;
+    maxTokens: number;
   };
 }
 
@@ -41,17 +47,24 @@ export class SummarizationError extends Error {
   readonly kind: Exclude<SummarizationErrorKind, "none">;
   readonly attempts: number;
   readonly retriable: boolean;
+  readonly retryAfterMs?: number;
 
   constructor(
     message: string,
     kind: Exclude<SummarizationErrorKind, "none">,
-    options: { cause?: unknown; attempts?: number; retriable?: boolean } = {},
+    options: {
+      cause?: unknown;
+      attempts?: number;
+      retriable?: boolean;
+      retryAfterMs?: number;
+    } = {},
   ) {
     super(message, { cause: options.cause });
     this.name = "SummarizationError";
     this.kind = kind;
     this.attempts = options.attempts ?? 1;
     this.retriable = options.retriable ?? false;
+    this.retryAfterMs = options.retryAfterMs;
   }
 }
 
@@ -60,6 +73,9 @@ export async function summarizeHost(
 ): Promise<SummarizeHostResult> {
   const env = getServerEnv();
   const start = Date.now();
+  const promptPayload = buildHostPrompt(normalizedHost, {
+    maxTokens: env.MAX_TOKENS,
+  });
   const fallback = buildFallbackSummary(normalizedHost);
 
   if (!env.LLM_API_KEY) {
@@ -73,6 +89,9 @@ export async function summarizeHost(
         durationMs: 0,
         usedFallback: true,
         provider: env.LLM_PROVIDER,
+        promptVersion: promptPayload.version,
+        promptCharacters: promptPayload.characters,
+        maxTokens: env.MAX_TOKENS,
       },
     };
   }
@@ -80,8 +99,12 @@ export async function summarizeHost(
   try {
     const { payload, attempts, durationMs } = await executeWithRetries(
       async (attempt, signal) => {
-        const prompt = buildPrompt(normalizedHost);
-  const raw = await performSummarization(normalizedHost, prompt, env, signal);
+        const raw = await performSummarization(
+          normalizedHost,
+          promptPayload.prompt,
+          env,
+          signal,
+        );
         try {
           return responseSchema.parse(raw);
         } catch (error) {
@@ -103,6 +126,9 @@ export async function summarizeHost(
         durationMs,
         usedFallback: false,
         provider: env.LLM_PROVIDER,
+        promptVersion: promptPayload.version,
+        promptCharacters: promptPayload.characters,
+        maxTokens: env.MAX_TOKENS,
       },
     };
   } catch (error) {
@@ -116,6 +142,9 @@ export async function summarizeHost(
         durationMs: Date.now() - start,
         usedFallback: true,
         provider: env.LLM_PROVIDER,
+        promptVersion: promptPayload.version,
+        promptCharacters: promptPayload.characters,
+        maxTokens: env.MAX_TOKENS,
       },
     };
   }
@@ -143,7 +172,11 @@ async function executeWithRetries<T>(
       if (!summarizationError.retriable || attempt >= maxAttempts) {
         throw summarizationError;
       }
-      await delay(backoffDelay(attempt));
+      await delay(
+        summarizationError.retryAfterMs !== undefined
+          ? summarizationError.retryAfterMs
+          : backoffDelay(attempt),
+      );
     }
   }
 
@@ -199,6 +232,17 @@ function toSummarizationError(
       cause: error.cause,
       attempts,
       retriable: error.retriable,
+      retryAfterMs: error.retryAfterMs,
+    });
+  }
+
+  const providerError = classifyProviderError(error);
+  if (providerError) {
+    return new SummarizationError(providerError.message, providerError.kind, {
+      cause: error,
+      attempts,
+      retriable: providerError.retriable,
+      retryAfterMs: providerError.retryAfterMs,
     });
   }
 
@@ -216,38 +260,95 @@ function toSummarizationError(
   });
 }
 
-function buildPrompt(host: NormalizedHost): string {
-  const lines: string[] = [];
-  lines.push(`Host ${host.ip} (${host.geoSummary})`);
-  lines.push(`ASN: ${host.asnSummary}`);
-  lines.push(`Risk badge: ${host.riskBadge.label}`);
-  lines.push(
-    `Services: ${host.serviceCount} total across ${Object.keys(host.serviceCountsByProtocol).map((protocol) => `${protocol}:${host.serviceCountsByProtocol[protocol]}`).join(", ")}`,
+interface ProviderErrorClassification {
+  kind: Exclude<SummarizationErrorKind, "none">;
+  message: string;
+  retriable: boolean;
+  retryAfterMs?: number;
+}
+
+function classifyProviderError(error: unknown): ProviderErrorClassification | null {
+  if (!error || typeof error !== "object") {
+    return null;
+  }
+
+  const status = readNumber((error as Record<string, unknown>).status);
+  const code = readString((error as Record<string, unknown>).code)?.toLowerCase();
+  const message = readString((error as Record<string, unknown>).message) ?? "Provider error";
+  const retryAfter = readNumber(
+    (error as Record<string, unknown>).retryAfterMs ??
+      extractRetryAfter((error as Record<string, unknown>).headers),
   );
-  if (host.vulnerabilities.total > 0) {
-    lines.push(
-      `Top CVEs: ${host.vulnerabilities.top
-        .slice(0, 5)
-        .map((vuln) => `${vuln.cveId} (${vuln.severity}${vuln.cvssScore ? ` ${vuln.cvssScore.toFixed(1)}` : ""})`)
-        .join(", ")}`,
-    );
+
+  if (status === 429 || code?.includes("rate") || code?.includes("throttle")) {
+    return {
+      kind: "rate-limit",
+      message,
+      retriable: true,
+      retryAfterMs: retryAfter,
+    };
   }
-  if (host.threat.securityLabels.length > 0) {
-    lines.push(`Threat labels: ${host.threat.securityLabels.join(", ")}`);
+
+  if (status && status >= 500) {
+    return {
+      kind: "transient",
+      message,
+      retriable: true,
+      retryAfterMs: retryAfter,
+    };
   }
-  if (host.threat.malwareFamilies.length > 0) {
-    lines.push(`Malware families: ${host.threat.malwareFamilies.join(", ")}`);
+
+  if (code === "etimedout") {
+    return {
+      kind: "timeout",
+      message,
+      retriable: true,
+      retryAfterMs: retryAfter,
+    };
   }
-  if (host.tlsEnabledCount > 0) {
-    lines.push(
-      `TLS: ${host.tlsEnabledCount} services with certificates (self-signed: ${host.hasSelfSignedCertificate ? "yes" : "no"})`,
-    );
+
+  if (status && status >= 400) {
+    return {
+      kind: "provider",
+      message,
+      retriable: false,
+    };
   }
-  if (host.representativeBanners.length > 0) {
-    lines.push(`Sample banners: ${host.representativeBanners.join(" | ")}`);
+
+  return null;
+}
+
+function readNumber(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
   }
-  lines.push("Compose a concise risk summary prioritizing exploitability, known compromises, and defensive actions.");
-  return lines.join("\n");
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+}
+
+function readString(value: unknown): string | undefined {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value;
+  }
+  return undefined;
+}
+
+function extractRetryAfter(headers: unknown): number | undefined {
+  if (!headers || typeof headers !== "object") {
+    return undefined;
+  }
+  const headerValue = readString((headers as Record<string, unknown>)["retry-after"]);
+  if (!headerValue) {
+    return undefined;
+  }
+  const seconds = Number(headerValue);
+  if (Number.isFinite(seconds)) {
+    return seconds * 1000;
+  }
+  return undefined;
 }
 
 function buildFallbackSummary(host: NormalizedHost): SummarizationPayload {
