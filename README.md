@@ -102,7 +102,20 @@ The canonical dataset lives at `SampleData/hosts_dataset.json` and is committed 
 
 - `loadHostsDataset()` – reads and validates the JSON once, caching the typed result for reuse.
 - `loadHosts()` – convenience helper returning just the hosts array.
+- `loadNormalizedHosts()` – returns hosts augmented with derived metrics for prompts and UI filters.
+- `getLoaderIssues()` – surfaces any validation warnings produced while tolerating partial records.
 - `resetHostsDatasetCache()` – clears the in-memory cache for tests.
+
+### Normalization outputs
+
+The normalization step (`src/server/normalize.ts`) precomputes prompt-friendly signals for each host so server components and future LLM actions avoid runtime aggregation:
+
+- Risk scoring via `riskBadge` combining maximum vulnerability severity with `threat_intelligence.risk_level`.
+- Protocol and port breakdowns (`serviceCountsByProtocol`, `openPorts`) to power quick filters.
+- TLS insights (`tlsEnabledCount`, `hasCertificates`, `hasSelfSignedCertificate`).
+- Vulnerability summaries including `maxSeverity`, `highestCvss`, and deduplicated `top` CVEs.
+- Threat context (`securityLabels`, `malwareFamilies`, `detectedMalwareNames`, `threatActors`).
+- Representative banners and software fingerprints for succinct summarization prompts.
 
 All server actions and parsers should route through these helpers to guarantee consistent validation.
 
