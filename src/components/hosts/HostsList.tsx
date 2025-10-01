@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import styled, { type DefaultTheme } from "styled-components";
 
@@ -155,51 +156,53 @@ export function HostsList({
       <HostsListGrid as="ul">
         {filteredHosts.map((host) => (
           <HostItem key={host.ip}>
-            <HostHeader>
-              <div>
-                <HostIp>{host.ip}</HostIp>
-                <HostLocation>
-                  {host.country} · {host.countryCode}
-                </HostLocation>
-              </div>
-              <SeverityBadge $level={host.risk.level}>
-                <span aria-hidden="true" />
-                <span>{host.risk.label}</span>
-              </SeverityBadge>
-            </HostHeader>
+            <HostCard href={`/hosts/${encodeURIComponent(host.ip)}`}>
+              <HostHeader>
+                <div>
+                  <HostIp>{host.ip}</HostIp>
+                  <HostLocation>
+                    {host.country} · {host.countryCode}
+                  </HostLocation>
+                </div>
+                <SeverityBadge $level={host.risk.level}>
+                  <span aria-hidden="true" />
+                  <span>{host.risk.label}</span>
+                </SeverityBadge>
+              </HostHeader>
 
-            <HostMeta>
-              <MetaItem>
-                <MetaLabel>Services</MetaLabel>
-                <MetaValue>{host.serviceCount}</MetaValue>
-              </MetaItem>
-              <MetaItem>
-                <MetaLabel>Protocols</MetaLabel>
-                <PillRow>
-                  {host.protocols.length === 0 ? (
-                    <Pill aria-label="No protocols">None</Pill>
-                  ) : (
-                    host.protocols.map((protocol) => (
-                      <Pill key={protocol}>{protocol.toUpperCase()}</Pill>
-                    ))
-                  )}
-                </PillRow>
-              </MetaItem>
-              <MetaItem>
-                <MetaLabel>Malware</MetaLabel>
-                <PillRow>
-                  {host.malwareIndicators.length === 0 ? (
-                    <Pill aria-label="No malware detected">None</Pill>
-                  ) : (
-                    host.malwareIndicators.map((indicator) => (
-                      <Pill key={indicator}>{indicator}</Pill>
-                    ))
-                  )}
-                </PillRow>
-              </MetaItem>
-            </HostMeta>
+              <HostMeta>
+                <MetaItem>
+                  <MetaLabel>Services</MetaLabel>
+                  <MetaValue>{host.serviceCount}</MetaValue>
+                </MetaItem>
+                <MetaItem>
+                  <MetaLabel>Protocols</MetaLabel>
+                  <PillRow>
+                    {host.protocols.length === 0 ? (
+                      <Pill aria-label="No protocols">None</Pill>
+                    ) : (
+                      host.protocols.map((protocol) => (
+                        <Pill key={protocol}>{protocol.toUpperCase()}</Pill>
+                      ))
+                    )}
+                  </PillRow>
+                </MetaItem>
+                <MetaItem>
+                  <MetaLabel>Malware</MetaLabel>
+                  <PillRow>
+                    {host.malwareIndicators.length === 0 ? (
+                      <Pill aria-label="No malware detected">None</Pill>
+                    ) : (
+                      host.malwareIndicators.map((indicator) => (
+                        <Pill key={indicator}>{indicator}</Pill>
+                      ))
+                    )}
+                  </PillRow>
+                </MetaItem>
+              </HostMeta>
 
-            <HostDescription>{host.risk.description}</HostDescription>
+              <HostDescription>{host.risk.description}</HostDescription>
+            </HostCard>
           </HostItem>
         ))}
       </HostsListGrid>
@@ -298,6 +301,9 @@ const HostsListGrid = styled.ul`
 
 const HostItem = styled.li`
   list-style: none;
+`;
+
+const HostCard = styled(Link)`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(3)};
@@ -306,6 +312,23 @@ const HostItem = styled.li`
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radius.lg};
   box-shadow: ${({ theme }) => theme.shadow.sm};
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.accent};
+    box-shadow: ${({ theme }) => theme.shadow.md};
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.focus};
+    box-shadow: ${({ theme }) =>
+      `0 0 0 3px color-mix(in srgb, ${theme.colors.focus} 30%, transparent)`};
+  }
 `;
 
 const HostHeader = styled.header`

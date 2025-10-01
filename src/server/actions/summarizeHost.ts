@@ -43,7 +43,7 @@ const responseSchema = z.object({
 
 type SummarizationPayload = z.infer<typeof responseSchema>;
 
-export class SummarizationError extends Error {
+class SummarizationError extends Error {
   readonly kind: Exclude<SummarizationErrorKind, "none">;
   readonly attempts: number;
   readonly retriable: boolean;
