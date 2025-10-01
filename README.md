@@ -65,7 +65,46 @@ Future LLM integrations will expect provider credentials in a `.env.local` file.
 
 ## Dataset
 
-The sample corpus ships with the repo so no extra downloads are necessary. Keep the file at `SampleData/hosts_dataset.json` in sync with schema definitions and tests as new functionality is built.
+The canonical dataset lives at `SampleData/hosts_dataset.json` and is committed verbatim so behaviour stays deterministic across development, demos, and tests. Server code should read it through the utilities in `src/server/dataset.ts`, which validate the payload with the Zod schemas under `src/server/schema.ts`.
+
+### Field coverage
+
+- `metadata`
+  - `description` – freeform summary of the dataset scope.
+  - `created_at` – ISO-8601 date string marking snapshot time.
+  - `data_sources` – array of source identifiers (always at least one).
+  - `hosts_count` – total hosts represented.
+  - `ips_analyzed` – array of IPs used for quick lookup in docs/tests.
+- `hosts[]`
+  - `ip` – IPv4 address.
+  - `location` – city/country strings (optional), ISO country code, and `coordinates { latitude, longitude }` (both required).
+  - `autonomous_system` – `asn`, owning `name`, and optional ISO `country_code`.
+  - `dns` _(optional)_ – `hostname` string when reverse DNS is available.
+  - `operating_system` _(optional)_ – detected `vendor`, `product`, optional `version`.
+  - `services[]` – always present but normalised to `[]` if absent.
+    - `port`/`protocol` – numeric port and service protocol string.
+    - `banner` _(optional)_ – raw banner response.
+    - `software[]` _(optional)_ – product/vendor/version triples discovered in banners.
+    - `vulnerabilities[]` _(optional)_ – CVE id, severity, optional CVSS score/description.
+    - `malware_detected` _(optional)_ – malware family name, type, confidence (0-1), and `threat_actors[]` labels.
+    - `authentication_required`, `tls_enabled`, `access_restricted` – boolean flags for interaction requirements.
+    - `certificate` _(optional)_ – TLS fingerprint, subject/issuer, optional SANs, `self_signed` indicator.
+    - `response_details` _(optional)_ – HTTP status code with optional title/content language.
+    - `error_message` _(optional)_ – service error banner (e.g., MySQL access rejection).
+  - `threat_intelligence` _(optional)_ –
+    - `security_labels[]` defaults to `[]` when missing.
+    - `malware_families[]` optional array of known families.
+    - `risk_level` string describing overall host risk.
+
+### Loader utilities
+
+`src/server/dataset.ts` exposes:
+
+- `loadHostsDataset()` – reads and validates the JSON once, caching the typed result for reuse.
+- `loadHosts()` – convenience helper returning just the hosts array.
+- `resetHostsDatasetCache()` – clears the in-memory cache for tests.
+
+All server actions and parsers should route through these helpers to guarantee consistent validation.
 
 ## Available Scripts
 

@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "preview": "npm run build && npm run start",
-  "lint": "eslint --max-warnings=0 src next.config.ts vitest.config.ts",
+    "lint": "eslint --max-warnings=0 src next.config.ts vitest.config.ts",
     "type-check": "tsc --noEmit",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
@@ -18,7 +18,8 @@
   "dependencies": {
     "next": "15.5.4",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
