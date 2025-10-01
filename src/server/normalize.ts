@@ -70,15 +70,6 @@ const SEVERITY_ALIASES: Record<string, SeverityLevel> = {
   unknown: "unknown",
 };
 
-const SEVERITY_ORDER: SeverityLevel[] = [
-  "none",
-  "informational",
-  "low",
-  "medium",
-  "high",
-  "critical",
-];
-
 const SEVERITY_RANK: Record<SeverityLevel, number> = {
   none: 0,
   informational: 1,
@@ -90,6 +81,14 @@ const SEVERITY_RANK: Record<SeverityLevel, number> = {
 };
 
 const MAX_BANNERS = 3;
+
+type RiskSignalSource = "vulnerability" | "vulnerability_cvss" | "threat_intel";
+
+const RISK_SOURCE_PRIORITY: Record<RiskSignalSource, number> = {
+  vulnerability: 0,
+  threat_intel: 1,
+  vulnerability_cvss: 2,
+};
 
 export function normalizeHosts(dataset: HostsDataset): NormalizedHost[] {
   return dataset.hosts.map(normalizeHost);
@@ -157,7 +156,7 @@ export function normalizeHost(host: Host): NormalizedHost {
     top: selectTopVulnerabilities(vulnerabilityMap),
   };
 
-  const riskBadge = buildRiskBadge(vulnerabilityContext, threatInfo);
+  const riskBadge = getRiskBadge(vulnerabilityContext, threatInfo);
 
   return {
     host,
@@ -347,47 +346,115 @@ function normalizeThreatInfo(
   };
 }
 
-function buildRiskBadge(
+export function getRiskBadge(
   vulnerabilities: NormalizedVulnerabilityContext,
   threat: NormalizedThreatInfo,
 ): RiskBadge {
-  let level: SeverityLevel = "none";
-  const sources: string[] = [];
-  const descriptionParts: string[] = [];
+  type Candidate = {
+    level: SeverityLevel;
+    source: RiskSignalSource;
+    description: string;
+    rank: number;
+  };
 
-  if (vulnerabilities.maxSeverity !== "none" && vulnerabilities.maxSeverity !== "unknown") {
-    level = vulnerabilities.maxSeverity;
-    sources.push("vulnerability");
-    descriptionParts.push(`Max vulnerability severity ${capitalise(level)}`);
-  }
-
-  if (threat.riskLevel && SEVERITY_RANK[threat.riskLevel] > SEVERITY_RANK[level]) {
-    level = threat.riskLevel;
-    sources.push("threat_intel");
-    descriptionParts.push(`Threat intel risk ${capitalise(threat.riskLevel)}`);
-  }
+  const candidates: Candidate[] = [];
 
   if (
-    level === "none" &&
-    (threat.securityLabels.length > 0 ||
-      threat.malwareFamilies.length > 0 ||
-      threat.detectedMalwareNames.length > 0)
+    vulnerabilities.maxSeverity !== "none" &&
+    vulnerabilities.maxSeverity !== "unknown"
   ) {
-    level = "informational";
-    sources.push("threat_labels");
-    descriptionParts.push("Threat labels present");
+    candidates.push({
+      level: vulnerabilities.maxSeverity,
+      source: "vulnerability",
+      description: `Max vulnerability severity ${capitalise(vulnerabilities.maxSeverity)}`,
+      rank: SEVERITY_RANK[vulnerabilities.maxSeverity],
+    });
   }
 
-  if (descriptionParts.length === 0) {
-    descriptionParts.push("No elevated risk signals detected");
+  if (typeof vulnerabilities.highestCvss === "number") {
+    const derivedSeverity = deriveSeverityFromCvss(vulnerabilities.highestCvss);
+    if (derivedSeverity !== "none" && derivedSeverity !== "unknown") {
+      candidates.push({
+        level: derivedSeverity,
+        source: "vulnerability_cvss",
+        description: `Highest CVSS ${vulnerabilities.highestCvss.toFixed(1)}`,
+        rank: SEVERITY_RANK[derivedSeverity],
+      });
+    }
+  }
+
+  if (threat.riskLevel) {
+    candidates.push({
+      level: threat.riskLevel,
+      source: "threat_intel",
+      description: `Threat intel risk ${capitalise(threat.riskLevel)}`,
+      rank: SEVERITY_RANK[threat.riskLevel],
+    });
+  }
+
+  let level: SeverityLevel = "none";
+  let descriptions: string[] = [];
+  let sources: string[] = [];
+
+  if (candidates.length > 0) {
+    const highestRank = Math.max(...candidates.map((candidate) => candidate.rank));
+    const topCandidates = candidates
+      .filter((candidate) => candidate.rank === highestRank)
+      .sort(
+        (a, b) => RISK_SOURCE_PRIORITY[a.source] - RISK_SOURCE_PRIORITY[b.source],
+      );
+
+    level = topCandidates[0].level;
+    descriptions = topCandidates.map((candidate) => candidate.description);
+    sources = Array.from(
+      new Set(topCandidates.map((candidate) => candidate.source)),
+    );
+  }
+
+  const hasThreatSignals =
+    threat.securityLabels.length > 0 ||
+    threat.malwareFamilies.length > 0 ||
+    threat.detectedMalwareNames.length > 0;
+
+  if (SEVERITY_RANK[level] === 0 && hasThreatSignals) {
+    level = "informational";
+    descriptions.push("Threat labels present");
+    sources = Array.from(new Set([...sources, "threat_labels"]));
+  }
+
+  if (descriptions.length === 0) {
+    descriptions.push("No elevated risk signals detected");
   }
 
   return {
     level,
     label: capitalise(level),
-    description: descriptionParts.join("; "),
+    description: descriptions.join("; "),
     sources,
   };
+}
+
+function deriveSeverityFromCvss(score: number): SeverityLevel {
+  if (!Number.isFinite(score)) {
+    return "unknown";
+  }
+
+  if (score >= 9) {
+    return "critical";
+  }
+  if (score >= 7) {
+    return "high";
+  }
+  if (score >= 4) {
+    return "medium";
+  }
+  if (score > 0) {
+    return "low";
+  }
+  if (score === 0) {
+    return "none";
+  }
+  return "unknown";
 }
 
 function summarizeGeo(host: Host): string {

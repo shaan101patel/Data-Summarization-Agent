@@ -110,12 +110,14 @@ The canonical dataset lives at `SampleData/hosts_dataset.json` and is committed 
 
 The normalization step (`src/server/normalize.ts`) precomputes prompt-friendly signals for each host so server components and future LLM actions avoid runtime aggregation:
 
-- Risk scoring via `riskBadge` combining maximum vulnerability severity with `threat_intelligence.risk_level`.
+- Risk scoring via `riskBadge`, produced by `getRiskBadge`, which deterministically selects the highest severity from vulnerability aggregates, CVSS-derived levels, and `threat_intelligence.risk_level` (falling back to `informational` when only labels exist).
 - Protocol and port breakdowns (`serviceCountsByProtocol`, `openPorts`) to power quick filters.
 - TLS insights (`tlsEnabledCount`, `hasCertificates`, `hasSelfSignedCertificate`).
 - Vulnerability summaries including `maxSeverity`, `highestCvss`, and deduplicated `top` CVEs.
 - Threat context (`securityLabels`, `malwareFamilies`, `detectedMalwareNames`, `threatActors`).
 - Representative banners and software fingerprints for succinct summarization prompts.
+
+Risk badges are ordered using a fixed priority (`vulnerability` → `threat_intel` → `vulnerability_cvss`) so ties resolve predictably, and the resulting `sources` array documents which signals contributed to the final label.
 
 All server actions and parsers should route through these helpers to guarantee consistent validation.
 
