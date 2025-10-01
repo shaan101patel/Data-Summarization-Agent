@@ -61,7 +61,18 @@ Husky ensures `lint`, `type-check`, and `test` succeed before a commit lands.
 
 ## Environment Variables
 
-Future LLM integrations will expect provider credentials in a `.env.local` file. Documented variables will be added as the summarization features are implemented. For now, no environment variables are required.
+Copy `.env.local.example` to `.env.local` and populate it with real provider credentials. All variables are read strictly on the server within server actions so no keys ever leak into the client bundle.
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `LLM_PROVIDER` | Identifier for the upstream model provider (e.g., `openai`, `azure-openai`). | `openai` |
+| `LLM_API_KEY` | Secret API key used to authenticate summarization requests. Summaries fall back to deterministic heuristics when this is missing. | _required for live calls_ |
+| `MODEL_NAME` | Provider-specific model identifier used for summaries. | `gpt-4o-mini` |
+| `TIMEOUT_MS` | Per-request timeout applied to LLM calls. | `15000` |
+| `MAX_TOKENS` | Token budget for summaries, applied by the eventual provider integration. | `512` |
+| `RETRIES` | Number of retry attempts for transient provider failures. | `2` |
+
+These variables are consumed exclusively inside server modules under `src/server`, keeping the trust boundary intact.
 
 ## Dataset
 
@@ -120,6 +131,12 @@ The normalization step (`src/server/normalize.ts`) precomputes prompt-friendly s
 Risk badges are ordered using a fixed priority (`vulnerability` → `threat_intel` → `vulnerability_cvss`) so ties resolve predictably, and the resulting `sources` array documents which signals contributed to the final label.
 
 All server actions and parsers should route through these helpers to guarantee consistent validation.
+
+## Summarization Actions
+
+`src/server/actions/summarizeHost.ts` implements a server-only action that accepts a `NormalizedHost`, builds a schema-aware prompt, and executes provider calls with timeouts, retries, and structured error handling. Results return `{ highlights[], risks[], narrative, errorKind }`, ensuring callers can differentiate missing configuration, timeouts, or provider issues.
+
+`src/server/actions/summarizeAll.ts` iterates through hosts with modest concurrency (default 3), yielding incremental results via an async iterator so UIs can stream batch summaries without blocking. Each item reuses `summarizeHost`, carries the originating host/index, and continues even when individual hosts fail.
 
 ## Available Scripts
 
