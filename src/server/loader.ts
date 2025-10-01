@@ -1,5 +1,3 @@
-"use server";
-
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { ZodError } from "zod";
@@ -13,7 +11,6 @@ import {
   ServiceSchema,
 } from "./schema";
 import { normalizeHosts, NormalizedHost } from "./normalize";
-export type { NormalizedHost } from "./normalize";
 
 export interface HostValidationIssue {
   ip: string | null;

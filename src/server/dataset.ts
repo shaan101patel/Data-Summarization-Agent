@@ -1,5 +1,3 @@
-"use server";
-
 export {
   HOSTS_DATASET_PATH,
   getLoaderIssues,
@@ -9,7 +7,5 @@ export {
   resetHostsDatasetCache,
 } from "./loader";
 
-export type {
-  HostValidationIssue,
-  NormalizedHost,
-} from "./loader";
+export type { HostValidationIssue } from "./loader";
+export type { NormalizedHost } from "./normalize";
