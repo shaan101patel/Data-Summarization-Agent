@@ -17,6 +17,8 @@ export const GlobalStyles = createGlobalStyle`
     color: ${({ theme }) => theme.colors.textPrimary};
     max-width: 100vw;
     overflow-x: hidden;
+    font-size: 16px;
+    line-height: 1.55;
   }
 
   body {
@@ -28,11 +30,13 @@ export const GlobalStyles = createGlobalStyle`
   a {
     color: ${({ theme }) => theme.colors.accent};
     text-decoration: none;
+    font-weight: 500;
   }
 
   a:hover,
   a:focus-visible {
-    text-decoration: underline;
+    color: ${({ theme }) => theme.colors.focus};
+    text-decoration: none;
   }
 
   ::selection {
@@ -42,5 +46,24 @@ export const GlobalStyles = createGlobalStyle`
   :focus-visible {
     outline: 3px solid ${({ theme }) => theme.colors.focus};
     outline-offset: 2px;
+  }
+
+  .skip-link {
+    position: absolute;
+    top: ${({ theme }) => theme.spacing(4)};
+    left: -999px;
+    background: ${({ theme }) => theme.colors.accent};
+    color: ${({ theme }) => theme.colors.accentContrast};
+    padding: ${({ theme }) => theme.spacing(2)} ${({ theme }) => theme.spacing(3)};
+    border-radius: ${({ theme }) => theme.radius.md};
+    z-index: 999;
+    transition: left 0.2s ease;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .skip-link:focus,
+  .skip-link:focus-visible {
+    left: ${({ theme }) => theme.spacing(4)};
   }
 `;

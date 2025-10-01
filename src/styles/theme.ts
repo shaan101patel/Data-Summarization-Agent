@@ -19,6 +19,8 @@ export interface AppTheme {
     focus: string;
     sidebarBg: string;
     sidebarBorder: string;
+    sidebarText: string;
+    sidebarMuted: string;
   };
   fonts: {
     body: string;
@@ -41,35 +43,37 @@ export interface AppTheme {
  */
 export const theme: AppTheme = {
   colors: {
-    page: "#f5f7fb",
+    page: "#f8fafc",
     surface: "#ffffff",
-    surfaceMuted: "#f0f4f8",
-    border: "#dde3ed",
-    textPrimary: "#1f2933",
-    textSecondary: "#4b5563",
+    surfaceMuted: "#f1f5f9",
+    border: "#e5e7eb",
+    textPrimary: "#1f2937",
+    textSecondary: "#374151",
     textMuted: "#6b7280",
-    accent: "#1f6feb",
-    accentSoft: "#d6e4ff",
-    accentContrast: "#0b3c91",
-    gold: "#f7b500",
-    success: "#0f766e",
+    accent: "#2563eb",
+    accentSoft: "#dbeafe",
+    accentContrast: "#ffffff",
+    gold: "#f59e0b",
+    success: "#15803d",
     warning: "#f59e0b",
-    danger: "#c2410c",
-    focus: "#f59e0b",
-    sidebarBg: "#ffffff",
-    sidebarBorder: "#e2e8f0",
+    danger: "#dc2626",
+    focus: "#2563eb",
+    sidebarBg: "#1e293b",
+    sidebarBorder: "#334155",
+    sidebarText: "#e2e8f0",
+    sidebarMuted: "#94a3b8",
   },
   fonts: {
     body: "var(--font-geist-sans, 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif)",
   },
   spacing: (multiplier = 1) => `${0.25 * multiplier}rem`,
   radius: {
-    sm: "0.5rem",
-    md: "0.75rem",
-    lg: "1.25rem",
+    sm: "0.25rem",
+    md: "0.375rem",
+    lg: "0.5rem",
   },
   shadow: {
-    sm: "0 1px 3px rgba(15, 23, 42, 0.08)",
-    md: "0 12px 32px rgba(15, 23, 42, 0.12)",
+    sm: "0 1px 3px rgba(15, 23, 42, 0.1)",
+    md: "0 4px 6px rgba(15, 23, 42, 0.1)",
   },
 };

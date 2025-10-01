@@ -237,14 +237,14 @@ function severityColor(level: SeverityLevel, theme: DefaultTheme) {
 const Section = styled.section`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing(5)};
+  gap: ${({ theme }) => theme.spacing(6)};
 `;
 
 const Filters = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(4)};
-  padding: ${({ theme }) => theme.spacing(4)};
+  padding: ${({ theme }) => theme.spacing(5)};
   background: ${({ theme }) => theme.colors.surface};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radius.lg};
@@ -270,14 +270,13 @@ const FilterButton = styled.button<FilterButtonProps>`
       $active ? theme.colors.accent : theme.colors.border};
   background:
     ${({ theme, $active }) =>
-      $active
-        ? `color-mix(in srgb, ${theme.colors.accent} 18%, transparent)`
-        : theme.colors.surfaceMuted};
+      $active ? theme.colors.accent : theme.colors.surfaceMuted};
   color:
     ${({ theme, $active }) =>
       $active ? theme.colors.accentContrast : theme.colors.textSecondary};
   border-radius: ${({ theme }) => theme.radius.md};
-  padding: ${({ theme }) => theme.spacing(2)} ${({ theme }) => theme.spacing(3)};
+  padding: ${({ theme }) => theme.spacing(2.5)}
+    ${({ theme }) => theme.spacing(3.5)};
   font-size: 0.9rem;
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
@@ -285,6 +284,16 @@ const FilterButton = styled.button<FilterButtonProps>`
   &:focus-visible {
     outline: 3px solid ${({ theme }) => theme.colors.focus};
     outline-offset: 2px;
+  }
+
+  &:hover {
+    background:
+      ${({ theme, $active }) =>
+        $active ? theme.colors.accent : theme.colors.surface};
+    border-color: ${({ theme }) => theme.colors.accent};
+    color:
+      ${({ theme, $active }) =>
+        $active ? theme.colors.accentContrast : theme.colors.accent};
   }
 `;
 
@@ -326,8 +335,7 @@ const HostCard = styled(Link)`
   &:focus-visible {
     outline: none;
     border-color: ${({ theme }) => theme.colors.focus};
-    box-shadow: ${({ theme }) =>
-      `0 0 0 3px color-mix(in srgb, ${theme.colors.focus} 30%, transparent)`};
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
   }
 `;
 

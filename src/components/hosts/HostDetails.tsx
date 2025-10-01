@@ -387,11 +387,13 @@ function severityColor(level: SeverityBadgeProps["$level"], theme: DefaultTheme)
   }
 }
 
-const PageWrapper = styled.main`
+const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(6)};
-  padding: ${({ theme }) => theme.spacing(6)};
+  width: min(100%, 76rem);
+  margin: 0 auto;
+  padding-bottom: ${({ theme }) => theme.spacing(8)};
 `;
 
 const TopBar = styled.header`
@@ -400,24 +402,36 @@ const TopBar = styled.header`
   align-items: flex-start;
   gap: ${({ theme }) => theme.spacing(4)};
   flex-wrap: wrap;
+  padding: ${({ theme }) => theme.spacing(5)};
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
 `;
 
 const BackLink = styled(Link)`
   display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(2)};
   font-size: 0.9rem;
+  font-weight: 600;
   color: ${({ theme }) => theme.colors.accent};
   text-decoration: none;
   margin-bottom: ${({ theme }) => theme.spacing(1)};
+  transition: color 0.2s ease, transform 0.2s ease;
 
-  &:hover {
-    text-decoration: underline;
+  &:hover,
+  &:focus-visible {
+    color: ${({ theme }) => theme.colors.focus};
+    transform: translateX(-2px);
   }
 `;
 
 const IPAddress = styled.h1`
   margin: 0;
-  font-size: clamp(2rem, 5vw, 2.6rem);
+  font-size: clamp(2.1rem, 4vw, 2.75rem);
   color: ${({ theme }) => theme.colors.textPrimary};
+  letter-spacing: -0.01em;
 `;
 
 const MetadataRow = styled.div`
@@ -444,11 +458,11 @@ const RiskBadge = styled.div<SeverityBadgeProps>`
   display: inline-flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing(2)};
-  padding: ${({ theme }) => theme.spacing(2)} ${({ theme }) => theme.spacing(3)};
-  border-radius: ${({ theme }) => theme.radius.md};
+  padding: ${({ theme }) => theme.spacing(2.5)} ${({ theme }) => theme.spacing(3.5)};
+  border-radius: ${({ theme }) => theme.radius.lg};
   border: 1px solid ${({ theme, $level }) => severityColor($level, theme)};
   color: ${({ theme, $level }) => severityColor($level, theme)};
-  background: ${({ theme, $level }) => `color-mix(in srgb, ${severityColor($level, theme)} 16%, transparent)`};
+  background: ${({ theme, $level }) => `color-mix(in srgb, ${severityColor($level, theme)} 18%, transparent)`};
   font-weight: 600;
 
   span[aria-hidden="true"] {
@@ -463,14 +477,19 @@ const LeadStats = styled.section`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: ${({ theme }) => theme.spacing(3)};
+  padding: ${({ theme }) => theme.spacing(3)};
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
 `;
 
 const StatCard = styled.article`
-  background: ${({ theme }) => theme.colors.surface};
+  background: ${({ theme }) => theme.colors.surfaceMuted};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radius.md};
-  padding: ${({ theme }) => theme.spacing(3)};
-  box-shadow: ${({ theme }) => theme.shadow.sm};
+  padding: ${({ theme }) => theme.spacing(3.5)};
+  box-shadow: none;
   display: grid;
   gap: ${({ theme }) => theme.spacing(1.5)};
 `;
@@ -497,7 +516,7 @@ const StatHint = styled.span`
 const Layout = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: ${({ theme }) => theme.spacing(4)};
+  gap: ${({ theme }) => theme.spacing(5)};
 
   @media (max-width: 1100px) {
     grid-template-columns: 1fr;
@@ -554,7 +573,8 @@ const ServiceCard = styled.article`
   padding: ${({ theme }) => theme.spacing(3)};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radius.md};
-  background: ${({ theme }) => theme.colors.surfaceMuted};
+  background: ${({ theme }) => theme.colors.surface};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
 `;
 
 const ServiceHeader = styled.div`
@@ -575,7 +595,7 @@ const ServiceBanner = styled.p`
   margin: 0;
   padding: ${({ theme }) => theme.spacing(2)};
   border-radius: ${({ theme }) => theme.radius.sm};
-  background: ${({ theme }) => theme.colors.surface};
+  background: ${({ theme }) => theme.colors.surfaceMuted};
   color: ${({ theme }) => theme.colors.textSecondary};
   font-family: "Consolas", "SFMono-Regular", monospace;
   font-size: 0.9rem;
@@ -584,7 +604,7 @@ const ServiceBanner = styled.p`
 const ServiceMeta = styled.div`
   display: grid;
   gap: ${({ theme }) => theme.spacing(2.5)};
-`
+`;
 const MetaBlock = styled.div`
   display: grid;
   gap: ${({ theme }) => theme.spacing(1)};
@@ -662,6 +682,10 @@ const ThreatGrid = styled.div`
 const ThreatBox = styled.div`
   display: grid;
   gap: ${({ theme }) => theme.spacing(1.5)};
+  padding: ${({ theme }) => theme.spacing(3)};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radius.md};
+  background: ${({ theme }) => theme.colors.surfaceMuted};
 `;
 
 const ThreatHeading = styled.h3`
@@ -699,9 +723,9 @@ const Tag = styled.span<{ $tone?: "warning" | "info" | "default" }>`
   ${({ theme, $tone = "default" }) => {
     switch ($tone) {
       case "warning":
-        return `background: ${theme.colors.accentSoft}; color: ${theme.colors.warning};`;
+        return `background: rgba(245, 158, 11, 0.18); color: ${theme.colors.warning};`;
       case "info":
-        return `background: ${theme.colors.surfaceMuted}; color: ${theme.colors.accent};`;
+        return `background: rgba(37, 99, 235, 0.16); color: ${theme.colors.accent};`;
       default:
         return `background: ${theme.colors.surfaceMuted}; color: ${theme.colors.textSecondary};`;
     }
@@ -734,7 +758,8 @@ const BannerItem = styled.li`
 
 const CertificateGrid = styled.div`
   display: grid;
-  gap: ${({ theme }) => theme.spacing(2)};
+  gap: ${({ theme }) => theme.spacing(2.5)};
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 `;
 
 const CertificateCard = styled.div`
@@ -742,7 +767,8 @@ const CertificateCard = styled.div`
   border-radius: ${({ theme }) => theme.radius.md};
   padding: ${({ theme }) => theme.spacing(2.5)};
   display: grid;
-  gap: ${({ theme }) => theme.spacing(1)};
-  background: ${({ theme }) => theme.colors.surfaceMuted};
+  gap: ${({ theme }) => theme.spacing(1.25)};
+  background: ${({ theme }) => theme.colors.surface};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
   color: ${({ theme }) => theme.colors.textSecondary};
 `;

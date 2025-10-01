@@ -80,9 +80,8 @@ interface PageContentProps {
 export const PageContent = styled.main`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing(6)};
-  padding: ${({ theme }) => theme.spacing(6)};
-  background: ${({ theme }) => theme.colors.page};
+  gap: ${({ theme }) => theme.spacing(8)};
+  width: min(100%, 76rem);
 `;
 
 export const Intro = styled.section`
@@ -90,6 +89,11 @@ export const Intro = styled.section`
   flex-wrap: wrap;
   justify-content: space-between;
   gap: ${({ theme }) => theme.spacing(6)};
+  padding: ${({ theme }) => theme.spacing(6)};
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  box-shadow: ${({ theme }) => theme.shadow.sm};
 `;
 
 export const PageEyebrow = styled.p`
@@ -103,8 +107,9 @@ export const PageEyebrow = styled.p`
 
 export const PageTitle = styled.h1`
   margin: ${({ theme }) => theme.spacing(2)} 0;
-  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-size: clamp(2.2rem, 3.2vw, 2.8rem);
   color: ${({ theme }) => theme.colors.textPrimary};
+  letter-spacing: -0.02em;
 `;
 
 export const PageSubtitle = styled.p`
@@ -126,11 +131,11 @@ export const Metric = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(1)};
-  padding: ${({ theme }) => theme.spacing(3)};
-  background: ${({ theme }) => theme.colors.surface};
+  padding: ${({ theme }) => theme.spacing(4)};
+  background: ${({ theme }) => theme.colors.surfaceMuted};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.radius.md};
-  box-shadow: ${({ theme }) => theme.shadow.sm};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  box-shadow: none;
   min-width: 0;
 `;
 
@@ -143,7 +148,7 @@ export const MetricLabel = styled.dt`
 
 export const MetricValue = styled.dd`
   margin: 0;
-  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  font-size: clamp(1.8rem, 4vw, 2.2rem);
   font-weight: 700;
   color: ${({ theme }) => theme.colors.textPrimary};
 `;

@@ -153,19 +153,24 @@ const PanelEyebrow = styled.p`
 
 const PanelTitle = styled.h2`
   margin: ${({ theme }) => theme.spacing(1)} 0 0;
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   color: ${({ theme }) => theme.colors.textPrimary};
 `;
 
 const SummarizeButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(2)};
   border: none;
   border-radius: ${({ theme }) => theme.radius.md};
   background: ${({ theme }) => theme.colors.accent};
   color: ${({ theme }) => theme.colors.accentContrast};
   font-weight: 600;
-  padding: ${({ theme }) => theme.spacing(2.5)} ${({ theme }) => theme.spacing(4)};
+  padding: ${({ theme }) => theme.spacing(2.75)} ${({ theme }) => theme.spacing(4.5)};
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
 
   &:disabled {
     opacity: 0.6;
@@ -179,7 +184,8 @@ const SummarizeButton = styled.button`
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(31, 111, 235, 0.25);
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+    background: ${({ theme }) => theme.colors.focus};
   }
 `;
 
@@ -200,9 +206,9 @@ const SkeletonLine = styled.span`
   border-radius: 999px;
   background: linear-gradient(
     90deg,
-    rgba(226, 232, 240, 0.3) 0%,
-    rgba(148, 163, 184, 0.35) 50%,
-    rgba(226, 232, 240, 0.3) 100%
+    rgba(219, 234, 254, 0.35) 0%,
+    rgba(148, 163, 184, 0.4) 50%,
+    rgba(219, 234, 254, 0.35) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;

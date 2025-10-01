@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { StyledComponentsRegistry } from "../lib/styledRegistry";
 import { ThemeProviders } from "@/components/providers/ThemeProviders";
-import censysLogo from '@/assets/censysLogo.png';
+import { AppShell } from "@/components/layout/AppShell";
+import censysLogo from "@/assets/censysLogo.png";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +37,7 @@ export default function RootLayout({
             <a className="skip-link" href="#main">
               Skip to main content
             </a>
-            {children}
+            <AppShell>{children}</AppShell>
           </ThemeProviders>
         </StyledComponentsRegistry>
       </body>
