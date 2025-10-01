@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useState, useCallback } from "react";
 import styled from "styled-components";
 
 import censysLogo from "@/assets/censysLogo.png";
@@ -11,28 +11,39 @@ import censysLogo from "@/assets/censysLogo.png";
 type NavItem = {
   label: string;
   href: string;
+  abbr: string;
 };
 
 const navItems: NavItem[] = [
-  { label: "Hosts", href: "/" },
+  { label: "Hosts", href: "/", abbr: "H" },
 ];
 
 export function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const handleMouseEnter = useCallback(() => setIsCollapsed(false), []);
+  const handleMouseLeave = useCallback(() => setIsCollapsed(true), []);
 
   return (
     <Shell>
-      <Sidebar>
-        <Brand href="/">
+      <Sidebar
+        id="app-shell-sidebar"
+        $collapsed={isCollapsed}
+        aria-label="Primary navigation"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <Brand href="/" $collapsed={isCollapsed}>
           <Logo>
             <Image src={censysLogo} alt="Censys" fill priority />
           </Logo>
-          <BrandMeta>
+          <BrandMeta $collapsed={isCollapsed}>
             <BrandName>Censys Agent</BrandName>
             <BrandTagline>Surface awareness</BrandTagline>
           </BrandMeta>
         </Brand>
-        <Nav aria-label="Primary">
+        <Nav aria-label="Primary" $collapsed={isCollapsed}>
           {navItems.map((item) => {
             const active =
               item.href === "/"
@@ -43,14 +54,18 @@ export function AppShell({ children }: PropsWithChildren) {
                 key={item.href}
                 href={item.href}
                 $active={active}
+                $collapsed={isCollapsed}
                 aria-current={active ? "page" : undefined}
+                aria-label={item.label}
+                title={item.label}
               >
-                {item.label}
+                <NavIcon aria-hidden="true">{item.abbr}</NavIcon>
+                <NavLabel $collapsed={isCollapsed}>{item.label}</NavLabel>
               </NavItemLink>
             );
           })}
         </Nav>
-        <SidebarFooter>
+        <SidebarFooter $collapsed={isCollapsed}>
           <SidebarBadge>Beta</SidebarBadge>
           <SidebarNote>
             Summaries are generated with constrained LLM context. Validate before
@@ -88,23 +103,33 @@ const Shell = styled.div`
   background: ${({ theme }) => theme.colors.page};
 `;
 
-const Sidebar = styled.aside`
+const Sidebar = styled.aside<{ $collapsed: boolean }>`
   display: flex;
   flex-direction: column;
-  width: 16.5rem;
-  padding: ${({ theme }) => theme.spacing(8)} ${({ theme }) => theme.spacing(6)};
-  gap: ${({ theme }) => theme.spacing(8)};
+  align-items: ${({ $collapsed }) => ($collapsed ? "center" : "stretch")};
+  width: ${({ $collapsed }) => ($collapsed ? "5rem" : "16.5rem")};
+  padding: ${({ theme, $collapsed }) =>
+    $collapsed
+      ? `${theme.spacing(6)} ${theme.spacing(3)}`
+      : `${theme.spacing(8)} ${theme.spacing(6)}`};
+  gap: ${({ theme, $collapsed }) =>
+    $collapsed ? theme.spacing(6) : theme.spacing(8)};
   background: ${({ theme }) => theme.colors.sidebarBg};
   color: ${({ theme }) => theme.colors.sidebarText};
   border-right: 1px solid ${({ theme }) => theme.colors.sidebarBorder};
+  transition: width 0.3s ease, padding 0.3s ease, gap 0.3s ease;
+  flex-shrink: 0;
 `;
 
-const Brand = styled(Link)`
+const Brand = styled(Link)<{ $collapsed: boolean }>`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing(4)};
+  justify-content: ${({ $collapsed }) => ($collapsed ? "center" : "flex-start")};
+  gap: ${({ theme, $collapsed }) =>
+    $collapsed ? theme.spacing(0) : theme.spacing(4)};
   color: inherit;
   text-decoration: none;
+  width: 100%;
 `;
 
 const Logo = styled.span`
@@ -116,8 +141,8 @@ const Logo = styled.span`
   background: rgba(255, 255, 255, 0.08);
 `;
 
-const BrandMeta = styled.span`
-  display: flex;
+const BrandMeta = styled.span<{ $collapsed: boolean }>`
+  display: ${({ $collapsed }) => ($collapsed ? "none" : "flex")};
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(1)};
 `;
@@ -135,16 +160,24 @@ const BrandTagline = styled.span`
   text-transform: uppercase;
 `;
 
-const Nav = styled.nav`
+
+const Nav = styled.nav<{ $collapsed: boolean }>`
   display: grid;
   gap: ${({ theme }) => theme.spacing(2)};
+  justify-items: ${({ $collapsed }) => ($collapsed ? "center" : "stretch")};
 `;
 
-const NavItemLink = styled(Link)<{ $active: boolean }>`
+const NavItemLink = styled(Link)<{ $active: boolean; $collapsed: boolean }>`
   display: inline-flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing(3)};
-  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
+  justify-content: ${({ $collapsed }) => ($collapsed ? "center" : "flex-start")};
+  gap: ${({ theme, $collapsed }) =>
+    $collapsed ? 0 : theme.spacing(3)};
+  width: ${({ $collapsed }) => ($collapsed ? "3.5rem" : "100%")};
+  padding: ${({ theme, $collapsed }) =>
+    $collapsed
+      ? `${theme.spacing(2.5)} 0`
+      : `${theme.spacing(3)} ${theme.spacing(4)}`};
   border-radius: ${({ theme }) => theme.radius.md};
   color: ${({ theme, $active }) =>
     $active ? theme.colors.accentSoft : theme.colors.sidebarText};
@@ -161,12 +194,36 @@ const NavItemLink = styled(Link)<{ $active: boolean }>`
   }
 `;
 
-const SidebarFooter = styled.footer`
+const NavIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: ${({ theme }) => theme.radius.md};
+  background: rgba(148, 163, 184, 0.18);
+  color: ${({ theme }) => theme.colors.sidebarText};
+  font-weight: 600;
+  font-size: 0.95rem;
+`;
+
+const NavLabel = styled.span<{ $collapsed: boolean }>`
+  display: inline-flex;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: ${({ $collapsed }) => ($collapsed ? "0" : "160px")};
+  opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
+  transition: max-width 0.3s ease, opacity 0.2s ease;
+`;
+
+const SidebarFooter = styled.footer<{ $collapsed: boolean }>`
   margin-top: auto;
-  display: grid;
+  display: ${({ $collapsed }) => ($collapsed ? "none" : "grid")};
   gap: ${({ theme }) => theme.spacing(3)};
   font-size: 0.8rem;
   color: ${({ theme }) => theme.colors.sidebarMuted};
+  text-align: left;
+  width: 100%;
 `;
 
 const SidebarBadge = styled.span`
@@ -230,6 +287,7 @@ const TopActions = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing(3)};
+  flex-wrap: wrap;
 `;
 
 const DocsLink = styled.a`
