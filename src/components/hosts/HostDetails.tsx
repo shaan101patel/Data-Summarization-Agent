@@ -4,12 +4,17 @@ import Link from "next/link";
 import { useMemo } from "react";
 import styled, { type DefaultTheme } from "styled-components";
 
+import type { DatasetSource } from "@/server/datasetStore";
 import type { NormalizedHost } from "@/server/normalize";
 
 import { HostSummaryPanel } from "./HostSummaryPanel";
 
 type HostDetailsProps = {
   host: NormalizedHost;
+  datasetId?: string;
+  datasetLabel?: string;
+  datasetSource?: DatasetSource;
+  datasetNotice?: string;
 };
 
 type SeverityBadgeProps = {
@@ -31,15 +36,26 @@ type MalwareSignal = {
   threatActors?: string[];
 };
 
-export function HostDetails({ host }: HostDetailsProps) {
+export function HostDetails({
+  host,
+  datasetId,
+  datasetLabel,
+  datasetSource,
+  datasetNotice,
+}: HostDetailsProps) {
   const certificateSummaries = useMemo(() => collectCertificates(host), [host]);
   const malwareSignals = useMemo(() => collectMalwareSignals(host), [host]);
+  const listHref = datasetId
+    ? `/hosts?dataset=${encodeURIComponent(datasetId)}`
+    : "/hosts";
+  const sourceLabel = describeDatasetSource(datasetSource ?? "sample");
+  const datasetLabelText = datasetLabel ?? "Bundled sample dataset";
 
   return (
     <PageWrapper>
       <TopBar>
         <div>
-          <BackLink href="/">← Back to hosts</BackLink>
+          <BackLink href={listHref}>← Back to hosts</BackLink>
           <IPAddress>{host.ip}</IPAddress>
           <MetadataRow>
             <MetaItem>{host.geoSummary}</MetaItem>
@@ -60,6 +76,16 @@ export function HostDetails({ host }: HostDetailsProps) {
               </>
             )}
           </MetadataRow>
+          <DatasetContext aria-label="Dataset context">
+            <DatasetBadge>{sourceLabel}</DatasetBadge>
+            <DatasetLabel>{datasetLabelText}</DatasetLabel>
+          </DatasetContext>
+          {datasetNotice ? (
+            <DatasetNotice role="status">
+              <DatasetNoticeIcon aria-hidden="true">ℹ️</DatasetNoticeIcon>
+              <span>{datasetNotice}</span>
+            </DatasetNotice>
+          ) : null}
         </div>
         <RiskBadge $level={host.riskBadge.level}>
           <span aria-hidden="true" />
@@ -370,6 +396,19 @@ function collectMalwareSignals(host: NormalizedHost): MalwareSignal[] {
   return signals;
 }
 
+function describeDatasetSource(source: DatasetSource): string {
+  switch (source) {
+    case "upload":
+      return "Uploaded dataset";
+    case "api":
+      return "API dataset";
+    case "sample":
+      return "Sample dataset";
+    default:
+      return "Dataset";
+  }
+}
+
 function severityColor(level: SeverityBadgeProps["$level"], theme: DefaultTheme) {
   switch (level) {
     case "critical":
@@ -445,6 +484,49 @@ const MetadataRow = styled.div`
 
 const MetaItem = styled.span`
   font-size: 0.95rem;
+`;
+
+const DatasetContext = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(2.5)};
+  margin-top: ${({ theme }) => theme.spacing(3)};
+  flex-wrap: wrap;
+`;
+
+const DatasetBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacing(1.5)}
+    ${({ theme }) => theme.spacing(2.5)};
+  border-radius: ${({ theme }) => theme.radius.md};
+  background: ${({ theme }) => theme.colors.surfaceMuted};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: ${({ theme }) => theme.colors.textMuted};
+`;
+
+const DatasetLabel = styled.span`
+  font-size: 0.95rem;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const DatasetNotice = styled.p`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(2)};
+  margin: ${({ theme }) => theme.spacing(3)} 0 0;
+  font-size: 0.95rem;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const DatasetNoticeIcon = styled.span`
+  font-size: 1rem;
+  line-height: 1;
 `;
 
 const Divider = styled.span`

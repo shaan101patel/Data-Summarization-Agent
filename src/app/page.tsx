@@ -1,7 +1,5 @@
-import { HostsPage } from "@/components/hosts/HostsPage";
-import { loadNormalizedHosts } from "@/server/loader";
+import { DatasetSelectionPanel } from "@/components/home/DatasetSelectionPanel";
 
-export default async function Home() {
-  const hosts = await loadNormalizedHosts();
-  return <HostsPage hosts={hosts} />;
+export default function Home() {
+  return <DatasetSelectionPanel />;
 }

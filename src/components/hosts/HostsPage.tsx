@@ -3,6 +3,7 @@
 import styled from "styled-components";
 
 import { HostsList, type HostsListItem } from "@/components/hosts/HostsList";
+import type { DatasetSource } from "@/server/datasetStore";
 import type { NormalizedHost, SeverityLevel } from "@/server/normalize";
 
 const severityRank: SeverityLevel[] = [
@@ -73,8 +74,12 @@ function mapHosts(hosts: NormalizedHost[]): HostsListItem[] {
   });
 }
 
-interface PageContentProps {
+interface HostsPageProps {
   hosts: NormalizedHost[];
+  datasetId?: string;
+  datasetLabel?: string;
+  datasetSource?: DatasetSource;
+  datasetNotice?: string;
 }
 
 export const PageContent = styled.main`
@@ -153,11 +158,25 @@ export const MetricValue = styled.dd`
   color: ${({ theme }) => theme.colors.textPrimary};
 `;
 
-export function HostsPage({ hosts }: PageContentProps) {
+export function HostsPage({
+  hosts,
+  datasetId,
+  datasetLabel,
+  datasetSource,
+  datasetNotice,
+}: HostsPageProps) {
   const severityOptions = sortSeverity(hosts.map((host) => host.riskBadge.level));
   const protocolOptions = buildProtocolOptions(hosts);
   const malwareOptions = buildMalwareOptions(hosts);
   const hostItems = mapHosts(hosts);
+  const source = datasetSource ?? "sample";
+  const label = datasetLabel ?? "Bundled sample dataset";
+  const sourceLabel = getDatasetSourceLabel(source);
+  const notice =
+    datasetNotice ??
+    (source === "upload"
+      ? "Custom uploads are retained securely for 15 minutes per session."
+      : "This snapshot ships with the agent for offline exploration.");
 
   return (
     <PageContent>
@@ -166,8 +185,7 @@ export function HostsPage({ hosts }: PageContentProps) {
           <PageEyebrow>Hosts overview</PageEyebrow>
           <PageTitle>Censys hostile surface snapshot</PageTitle>
           <PageSubtitle>
-            Explore the sample dataset, triage higher-risk assets, and prepare targeted summaries
-            without leaving the dashboard.
+            Viewing <strong>{label}</strong> ({sourceLabel}). {notice}
           </PageSubtitle>
         </div>
         <LeadMetrics>
@@ -201,7 +219,21 @@ export function HostsPage({ hosts }: PageContentProps) {
         severityOptions={severityOptions}
         protocolOptions={protocolOptions}
         malwareOptions={malwareOptions}
+        datasetId={datasetId}
       />
     </PageContent>
   );
+}
+
+function getDatasetSourceLabel(source: DatasetSource): string {
+  switch (source) {
+    case "sample":
+      return "Sample dataset";
+    case "upload":
+      return "Uploaded dataset";
+    case "api":
+      return "API dataset";
+    default:
+      return "Dataset";
+  }
 }

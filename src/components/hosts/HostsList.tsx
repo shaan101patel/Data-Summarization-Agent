@@ -25,6 +25,7 @@ export interface HostsListProps {
   severityOptions: SeverityLevel[];
   protocolOptions: string[];
   malwareOptions: string[];
+  datasetId?: string;
 }
 
 const ALL = "all" as const;
@@ -44,6 +45,7 @@ export function HostsList({
   severityOptions,
   protocolOptions,
   malwareOptions,
+  datasetId,
 }: HostsListProps) {
   const [severityFilter, setSeverityFilter] = useState<SeverityFilterValue>(ALL);
   const [protocolFilters, setProtocolFilters] = useState<string[]>([]);
@@ -154,9 +156,14 @@ export function HostsList({
       </Summary>
 
       <HostsListGrid as="ul">
-        {filteredHosts.map((host) => (
-          <HostItem key={host.ip}>
-            <HostCard href={`/hosts/${encodeURIComponent(host.ip)}`}>
+        {filteredHosts.map((host) => {
+          const detailHref = datasetId
+            ? `/hosts/${encodeURIComponent(host.ip)}?dataset=${encodeURIComponent(datasetId)}`
+            : `/hosts/${encodeURIComponent(host.ip)}`;
+
+          return (
+            <HostItem key={host.ip}>
+              <HostCard href={detailHref}>
               <HostHeader>
                 <div>
                   <HostIp>{host.ip}</HostIp>
@@ -202,9 +209,10 @@ export function HostsList({
               </HostMeta>
 
               <HostDescription>{host.risk.description}</HostDescription>
-            </HostCard>
-          </HostItem>
-        ))}
+              </HostCard>
+            </HostItem>
+          );
+        })}
       </HostsListGrid>
     </Section>
   );
