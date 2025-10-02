@@ -2,7 +2,7 @@
 
 # Data Summarization Agent
 
-A Next.js App Router project that loads Censys host data, normalizes security signals, and powers AI-assisted summaries using OpenAI's GPT models.
+A Next.js App Router project that loads Censys host data, normalizes security signals, and powers AI-assisted summaries using OpenAI's GPT models. DEMO/GUIDE VIDEO: [https://youtu.be/VwfvIGCBuEQ](https://youtu.be/VwfvIGCBuEQ)
 
 </div>
 
