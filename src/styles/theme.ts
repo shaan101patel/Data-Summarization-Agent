@@ -6,9 +6,11 @@ export interface AppTheme {
     surface: string;
     surfaceMuted: string;
     border: string;
+    text: string;
     textPrimary: string;
     textSecondary: string;
     textMuted: string;
+    textLight: string;
     primary: string;
     primaryDark: string;
     accent: string;
@@ -32,10 +34,12 @@ export interface AppTheme {
     sm: string;
     md: string;
     lg: string;
+    full: string;
   };
   shadow: {
     sm: string;
     md: string;
+    lg: string;
   };
 }
 
@@ -49,9 +53,11 @@ export const theme: AppTheme = {
     surface: "#ffffff",
     surfaceMuted: "#f1f5f9",
     border: "#e5e7eb",
+    text: "#1f2937",
     textPrimary: "#1f2937",
     textSecondary: "#374151",
     textMuted: "#6b7280",
+    textLight: "#6b7280",
     primary: "#2c4f5e",
     primaryDark: "#1e3a45",
     accent: "#2c4f5e",
@@ -75,9 +81,11 @@ export const theme: AppTheme = {
     sm: "0.25rem",
     md: "0.375rem",
     lg: "0.5rem",
+    full: "9999px",
   },
   shadow: {
     sm: "0 1px 3px rgba(15, 23, 42, 0.1)",
     md: "0 4px 6px rgba(15, 23, 42, 0.1)",
+    lg: "0 10px 15px rgba(15, 23, 42, 0.15)",
   },
 };

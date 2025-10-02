@@ -13,9 +13,11 @@ export function Sidebar() {
   const searchParams = useSearchParams();
   const hasDataset = searchParams.get("dataset") !== null;
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isEnhancementsOpen, setIsEnhancementsOpen] = useState(false);
 
   const isUploadPage = pathname === "/";
   const isHostsPage = pathname.startsWith("/hosts");
+  const isEnhancementsPage = pathname.startsWith("/enhancements");
 
   return (
     <SidebarWrapper
@@ -58,6 +60,56 @@ export function Sidebar() {
               <IconWrapper aria-hidden="true">⊞</IconWrapper>
               <LinkText $expanded={isExpanded}>Hosts</LinkText>
             </NavLink>
+          </NavItem>
+
+          <NavItem>
+            <EnhancementsToggle
+              onClick={() => setIsEnhancementsOpen(!isEnhancementsOpen)}
+              $expanded={isExpanded}
+              $active={isEnhancementsPage}
+              title="Future Enhancements"
+            >
+              <IconWrapper aria-hidden="true">✨</IconWrapper>
+              <LinkText $expanded={isExpanded}>Future Enhancements</LinkText>
+              <ChevronIcon $expanded={isExpanded} $open={isEnhancementsOpen}>
+                {isExpanded && (isEnhancementsOpen ? "▼" : "▶")}
+              </ChevronIcon>
+            </EnhancementsToggle>
+
+            {isEnhancementsOpen && (
+              <SubMenu $expanded={isExpanded}>
+                <SubMenuItem>
+                  <SubNavLink
+                    href="/enhancements/ai-capabilities"
+                    $active={pathname === "/enhancements/ai-capabilities"}
+                    $expanded={isExpanded}
+                    title="Advanced AI Capabilities"
+                  >
+                    <SubLinkText $expanded={isExpanded}>AI Capabilities</SubLinkText>
+                  </SubNavLink>
+                </SubMenuItem>
+                <SubMenuItem>
+                  <SubNavLink
+                    href="/enhancements/censys-integration"
+                    $active={pathname === "/enhancements/censys-integration"}
+                    $expanded={isExpanded}
+                    title="Real-Time Censys API Integration"
+                  >
+                    <SubLinkText $expanded={isExpanded}>Censys Integration</SubLinkText>
+                  </SubNavLink>
+                </SubMenuItem>
+                <SubMenuItem>
+                  <SubNavLink
+                    href="/enhancements/database-persistence"
+                    $active={pathname === "/enhancements/database-persistence"}
+                    $expanded={isExpanded}
+                    title="Database & Persistence"
+                  >
+                    <SubLinkText $expanded={isExpanded}>Database & Persistence</SubLinkText>
+                  </SubNavLink>
+                </SubMenuItem>
+              </SubMenu>
+            )}
           </NavItem>
         </NavList>
       </Nav>
@@ -235,3 +287,107 @@ const BackToTopButton = styled.button<{ $expanded: boolean }>`
     outline-offset: 2px;
   }
 `;
+
+const EnhancementsToggle = styled.button<{ $expanded: boolean; $active: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: ${({ $expanded }) => ($expanded ? "flex-start" : "center")};
+  gap: ${({ theme, $expanded }) => ($expanded ? theme.spacing(3) : "0")};
+  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
+  border-radius: ${({ theme }) => theme.radius.md};
+  text-decoration: none;
+  color: ${({ theme }) => theme.colors.sidebarText};
+  font-weight: 500;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  position: relative;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primaryDark};
+    color: ${({ theme }) => theme.colors.sidebarText};
+    transform: translateX(2px);
+  }
+
+  &:focus-visible {
+    outline: 3px solid ${({ theme }) => theme.colors.sidebarText};
+    outline-offset: 2px;
+  }
+
+  ${({ $active, theme }) =>
+    $active &&
+    `
+    background: ${theme.colors.primaryDark};
+    color: ${theme.colors.sidebarText};
+    font-weight: 600;
+  `}
+`;
+
+const ChevronIcon = styled.span<{ $expanded: boolean; $open: boolean }>`
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #f59e0b;
+  display: ${({ $expanded }) => ($expanded ? "inline" : "none")};
+  transition: transform 0.2s ease;
+`;
+
+const SubMenu = styled.ul<{ $expanded: boolean }>`
+  list-style: none;
+  margin: ${({ theme }) => theme.spacing(2)} 0 0 0;
+  padding: 0;
+  display: ${({ $expanded }) => ($expanded ? "flex" : "none")};
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing(1)};
+  padding-left: ${({ theme, $expanded }) => ($expanded ? theme.spacing(6) : "0")};
+`;
+
+const SubMenuItem = styled.li`
+  margin: 0;
+`;
+
+const SubNavLink = styled(Link)<{ $active: boolean; $expanded: boolean }>`
+  display: ${({ $expanded }) => ($expanded ? "flex" : "none")};
+  align-items: center;
+  padding: ${({ theme }) => theme.spacing(2)} ${({ theme }) => theme.spacing(3)};
+  border-radius: ${({ theme }) => theme.radius.sm};
+  text-decoration: none;
+  color: ${({ theme }) => theme.colors.sidebarMuted};
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primaryDark};
+    color: ${({ theme }) => theme.colors.sidebarText};
+    transform: translateX(2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.sidebarText};
+    outline-offset: 2px;
+  }
+
+  ${({ $active, theme }) =>
+    $active &&
+    `
+    background: ${theme.colors.primaryDark};
+    color: ${theme.colors.sidebarText};
+    font-weight: 600;
+
+    &::before {
+      content: "→";
+      margin-right: ${theme.spacing(2)};
+      color: #f59e0b;
+    }
+  `}
+`;
+
+const SubLinkText = styled.span<{ $expanded: boolean }>`
+  font-size: 0.9rem;
+  display: ${({ $expanded }) => ($expanded ? "inline" : "none")};
+  overflow: hidden;
+  white-space: nowrap;
+`;
+
