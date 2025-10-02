@@ -228,13 +228,13 @@ const PrimaryButton = styled.button`
   gap: ${({ theme }) => theme.spacing(2)};
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(5)};
   border-radius: ${({ theme }) => theme.radius.md};
-  background: ${({ theme }) => theme.colors.accent};
+  background: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.accentContrast};
   border: none;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background 0.2s ease;
 
   &[data-pending="true"] {
     opacity: 0.85;
@@ -242,6 +242,7 @@ const PrimaryButton = styled.button`
   }
 
   &:hover {
+    background: ${({ theme }) => theme.colors.primaryDark};
     transform: translateY(-1px);
     box-shadow: ${({ theme }) => theme.shadow.md};
   }

@@ -275,10 +275,10 @@ const FilterLabel = styled.span`
 const FilterButton = styled.button<FilterButtonProps>`
   border: 1px solid
     ${({ theme, $active }) =>
-      $active ? theme.colors.accent : theme.colors.border};
+      $active ? theme.colors.primary : theme.colors.border};
   background:
     ${({ theme, $active }) =>
-      $active ? theme.colors.accent : theme.colors.surfaceMuted};
+      $active ? theme.colors.primary : theme.colors.surfaceMuted};
   color:
     ${({ theme, $active }) =>
       $active ? theme.colors.accentContrast : theme.colors.textSecondary};
@@ -297,11 +297,11 @@ const FilterButton = styled.button<FilterButtonProps>`
   &:hover {
     background:
       ${({ theme, $active }) =>
-        $active ? theme.colors.accent : theme.colors.surface};
-    border-color: ${({ theme }) => theme.colors.accent};
+        $active ? theme.colors.primary : theme.colors.surface};
+    border-color: ${({ theme }) => theme.colors.primary};
     color:
       ${({ theme, $active }) =>
-        $active ? theme.colors.accentContrast : theme.colors.accent};
+        $active ? theme.colors.accentContrast : theme.colors.primary};
   }
 `;
 
@@ -335,7 +335,7 @@ const HostCard = styled(Link)`
     transform 0.2s ease;
 
   &:hover {
-    border-color: ${({ theme }) => theme.colors.accent};
+    border-color: ${({ theme }) => theme.colors.primary};
     box-shadow: ${({ theme }) => theme.shadow.md};
     transform: translateY(-2px);
   }
@@ -343,7 +343,7 @@ const HostCard = styled(Link)`
   &:focus-visible {
     outline: none;
     border-color: ${({ theme }) => theme.colors.focus};
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 0 0 3px rgba(44, 79, 94, 0.25);
   }
 `;
 

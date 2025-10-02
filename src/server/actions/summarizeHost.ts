@@ -212,15 +212,73 @@ async function withTimeout<T>(
 
 async function performSummarization(
   normalizedHost: NormalizedHost,
-  _prompt: string,
-  _env: ServerEnv,
+  prompt: string,
+  env: ServerEnv,
   signal: AbortSignal,
 ): Promise<SummarizationPayload> {
   signal.throwIfAborted();
-  // TODO: replace this simulated response with a real provider integration.
-  await delay(5);
-  signal.throwIfAborted();
-  return buildFallbackSummary(normalizedHost);
+  
+  try {
+    // Make the OpenAI API call
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${env.LLM_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: env.MODEL_NAME || 'gpt-4',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a cybersecurity expert analyzing host data from Censys. Respond ONLY with valid JSON in this exact format: {"highlights": ["string1", "string2"], "risks": ["string1", "string2"], "narrative": "string"}. Do not include any markdown formatting or code blocks.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: env.MAX_TOKENS || 500,
+        temperature: 0.7,
+      }),
+      signal,
+    });
+
+    signal.throwIfAborted();
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+
+    if (!content) {
+      throw new Error('No content received from OpenAI API');
+    }
+
+    // Parse the JSON response
+    let parsedContent: unknown;
+    try {
+      // Remove markdown code blocks if present
+      const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
+      parsedContent = JSON.parse(cleanContent);
+    } catch (parseError) {
+      throw new Error(`Failed to parse OpenAI response as JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+    }
+
+    // Validate the response schema
+    const validated = responseSchema.parse(parsedContent);
+    
+    return validated;
+  } catch (error) {
+    signal.throwIfAborted();
+    
+    // If API fails, fall back to the deterministic summary
+    console.error('OpenAI API call failed, using fallback summary:', error);
+    return buildFallbackSummary(normalizedHost);
+  }
 }
 
 function toSummarizationError(

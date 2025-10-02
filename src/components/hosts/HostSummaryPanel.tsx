@@ -163,7 +163,7 @@ const SummarizeButton = styled.button`
   gap: ${({ theme }) => theme.spacing(2)};
   border: none;
   border-radius: ${({ theme }) => theme.radius.md};
-  background: ${({ theme }) => theme.colors.accent};
+  background: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.accentContrast};
   font-weight: 600;
   padding: ${({ theme }) => theme.spacing(2.75)} ${({ theme }) => theme.spacing(4.5)};
@@ -184,8 +184,8 @@ const SummarizeButton = styled.button`
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
-    background: ${({ theme }) => theme.colors.focus};
+    box-shadow: 0 10px 20px rgba(44, 79, 94, 0.25);
+    background: ${({ theme }) => theme.colors.primaryDark};
   }
 `;
 

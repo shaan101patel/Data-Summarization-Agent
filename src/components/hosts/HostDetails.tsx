@@ -454,14 +454,14 @@ const BackLink = styled(Link)`
   gap: ${({ theme }) => theme.spacing(2)};
   font-size: 0.9rem;
   font-weight: 600;
-  color: ${({ theme }) => theme.colors.accent};
+  color: ${({ theme }) => theme.colors.primary};
   text-decoration: none;
   margin-bottom: ${({ theme }) => theme.spacing(1)};
   transition: color 0.2s ease, transform 0.2s ease;
 
   &:hover,
   &:focus-visible {
-    color: ${({ theme }) => theme.colors.focus};
+    color: ${({ theme }) => theme.colors.primaryDark};
     transform: translateX(-2px);
   }
 `;
@@ -807,7 +807,7 @@ const Tag = styled.span<{ $tone?: "warning" | "info" | "default" }>`
       case "warning":
         return `background: rgba(245, 158, 11, 0.18); color: ${theme.colors.warning};`;
       case "info":
-        return `background: rgba(37, 99, 235, 0.16); color: ${theme.colors.accent};`;
+        return `background: rgba(44, 79, 94, 0.16); color: ${theme.colors.primary};`;
       default:
         return `background: ${theme.colors.surfaceMuted}; color: ${theme.colors.textSecondary};`;
     }

@@ -1,11 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { PropsWithChildren } from "react";
 import styled from "styled-components";
 
-import censysLogo from "@/assets/censysLogo.png";
 import { Sidebar } from "./Sidebar";
 
 export function AppShell({ children }: PropsWithChildren) {
@@ -14,15 +11,6 @@ export function AppShell({ children }: PropsWithChildren) {
       <Sidebar />
       <Main>
         <TopBar>
-          <Brand href="/">
-            <Logo>
-              <Image src={censysLogo} alt="Censys" fill priority />
-            </Logo>
-            <BrandMeta>
-              <BrandName>Censys Agent</BrandName>
-              <BrandTagline>Surface awareness</BrandTagline>
-            </BrandMeta>
-          </Brand>
           <TopGroup>
             <TopTitle>Exposure intelligence</TopTitle>
             <TopSubtitle>
@@ -31,7 +19,7 @@ export function AppShell({ children }: PropsWithChildren) {
           </TopGroup>
           <TopActions>
             <DocsLink
-              href="https://docs.censys.io/"
+              href="https://docs.censys.com/docs/platform-datasets"
               target="_blank"
               rel="noreferrer noopener"
             >
@@ -56,6 +44,7 @@ const Main = styled.div`
   display: flex;
   flex-direction: column;
   min-width: 0;
+  margin-left: 80px;
 `;
 
 const TopBar = styled.header`
@@ -64,46 +53,10 @@ const TopBar = styled.header`
   align-items: center;
   justify-content: space-between;
   gap: ${({ theme }) => theme.spacing(4)};
-  padding: ${({ theme }) => theme.spacing(6)} ${({ theme }) => theme.spacing(8)};
-  background: ${({ theme }) => theme.colors.surface};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  padding: ${({ theme }) => theme.spacing(5)} ${({ theme }) => theme.spacing(8)};
+  background: #3d6375;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.primaryDark};
   box-shadow: ${({ theme }) => theme.shadow.sm};
-`;
-
-const Brand = styled(Link)`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing(4)};
-  color: inherit;
-  text-decoration: none;
-`;
-
-const Logo = styled.span`
-  position: relative;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: ${({ theme }) => theme.radius.lg};
-  overflow: hidden;
-  background: rgba(37, 99, 235, 0.08);
-`;
-
-const BrandMeta = styled.span`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing(1)};
-`;
-
-const BrandName = styled.span`
-  font-weight: 600;
-  font-size: 1.05rem;
-  color: ${({ theme }) => theme.colors.textPrimary};
-`;
-
-const BrandTagline = styled.span`
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.textMuted};
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 `;
 
 const TopGroup = styled.div`
@@ -113,16 +66,16 @@ const TopGroup = styled.div`
 
 const TopTitle = styled.h1`
   margin: 0;
-  font-size: clamp(1.4rem, 2.4vw, 1.75rem);
-  color: ${({ theme }) => theme.colors.textPrimary};
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  color: ${({ theme }) => theme.colors.sidebarText};
   font-weight: 600;
 `;
 
 const TopSubtitle = styled.p`
   margin: 0;
-  color: ${({ theme }) => theme.colors.textSecondary};
+  color: ${({ theme }) => theme.colors.sidebarMuted};
   max-width: 48ch;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 `;
 
 const TopActions = styled.div`
@@ -136,21 +89,21 @@ const DocsLink = styled.a`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: ${({ theme }) => theme.spacing(2.5)} ${({ theme }) => theme.spacing(4)};
+  padding: ${({ theme }) => theme.spacing(2)} ${({ theme }) => theme.spacing(3.5)};
   border-radius: ${({ theme }) => theme.radius.md};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: ${({ theme }) => theme.colors.surface};
-  color: ${({ theme }) => theme.colors.textSecondary};
+  border: 1px solid ${({ theme }) => theme.colors.sidebarText};
+  background: transparent;
+  color: ${({ theme }) => theme.colors.sidebarText};
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease,
     transform 0.2s ease;
 
   &:hover,
   &:focus-visible {
-    background: ${({ theme }) => theme.colors.accent};
-    border-color: ${({ theme }) => theme.colors.accent};
-    color: ${({ theme }) => theme.colors.accentContrast};
+    background: ${({ theme }) => theme.colors.primaryDark};
+    border-color: ${({ theme }) => theme.colors.primaryDark};
+    color: ${({ theme }) => theme.colors.sidebarText};
     transform: translateY(-1px);
   }
 `;

@@ -9,6 +9,8 @@ export interface AppTheme {
     textPrimary: string;
     textSecondary: string;
     textMuted: string;
+    primary: string;
+    primaryDark: string;
     accent: string;
     accentSoft: string;
     accentContrast: string;
@@ -50,18 +52,20 @@ export const theme: AppTheme = {
     textPrimary: "#1f2937",
     textSecondary: "#374151",
     textMuted: "#6b7280",
-    accent: "#2563eb",
+    primary: "#2c4f5e",
+    primaryDark: "#1e3a45",
+    accent: "#2c4f5e",
     accentSoft: "#dbeafe",
     accentContrast: "#ffffff",
     gold: "#f59e0b",
     success: "#15803d",
     warning: "#f59e0b",
     danger: "#dc2626",
-    focus: "#2563eb",
-    sidebarBg: "#1e293b",
-    sidebarBorder: "#334155",
-    sidebarText: "#e2e8f0",
-    sidebarMuted: "#94a3b8",
+    focus: "#2c4f5e",
+    sidebarBg: "#2c4f5e",
+    sidebarBorder: "#1e3a45",
+    sidebarText: "#ffffff",
+    sidebarMuted: "#a8c5d1",
   },
   fonts: {
     body: "var(--font-geist-sans, 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif)",
